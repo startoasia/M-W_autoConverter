@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨系統路徑轉換工具 | Mac ⇄ Windows</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --container-bg: rgba(22, 27, 34, 0.7);
+            --card-bg: rgba(33, 38, 45, 0.8);
+            --primary-color: #58a6ff;
+            --primary-hover: #3182ce;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --success-color: #2ea043;
+            --ring-color: rgba(88, 166, 255, 0.3);
+            --mac-color: #a8a8aa;
+            --win-color: #00a4ef;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(88, 166, 255, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(46, 160, 67, 0.1), transparent 25%);
+            background-attachment: fixed;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--container-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #58a6ff, #a371f7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+        }
+
+        .os-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .os-label.mac { color: var(--mac-color); }
+        .os-label.win { color: var(--win-color); }
+
+        .os-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .copy-btn.copied {
+            color: var(--success-color);
+            border-color: var(--success-color);
+            background: rgba(46, 160, 67, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            color: var(--text-main);
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            resize: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--ring-color);
+            background: rgba(33, 38, 45, 0.95);
+        }
+
+        textarea::placeholder {
+            color: rgba(139, 148, 158, 0.5);
+        }
+
+        .exchange-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-muted);
+            margin-top: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .exchange-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .toast.success .icon {
+            color: var(--success-color);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* Settings area */
+        .settings-panel {
+            margin-top: 30px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .setting-item label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .setting-item input {
+            background: rgba(13, 17, 23, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .setting-item input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .converter-grid {
+                grid-template-columns: 1fr;
+            }
+            .exchange-icon {
+                margin: 0 auto;
+                transform: rotate(90deg);
+                margin-top: 0;
+            }
+            .settings-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>跨系統路徑轉換工具</h1>
+            <p class="subtitle">即時雙向轉換 Apple (Mac) 與 Windows 伺服器路徑</p>
+        </header>
+
+        <div class="converter-grid">
+            <!-- Mac Area -->
+            <div class="input-group">
+                <div class="group-header">
+                    <div class="os-label mac">
+                        <svg class="os-icon" viewBox="0 0 384 512" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Apple Icon -->
+                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+                        </svg>
+                        Apple (Mac)
+                    </div>
+                    <button class="copy-btn" id="copy-mac">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>複製</span>
+                    </button>
+                </div>
+                <textarea id="mac-input" placeholder="貼上 Mac 路徑...&#10;例如: /Volumes/01_歐姬兒 OZIO/各部門製作物/..."></textarea>
+            </div>
+
+            <!-- Exchange Icon -->
+            <div class="exchange-icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M17 3l4 4-4 4"></path>
+                    <path d="M3 7h18"></path>
+                    <path d="M7 21l-4-4 4-4"></path>
+                    <path d="M21 17H3"></path>
+                </svg>
+            </div>
+
+            <!-- Windows Area -->
+            <div class="input-group">
+                <div class="group-header">
+                    <div class="os-label win">
+                        <svg class="os-icon" viewBox="0 0 448 512" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Windows Icon -->
+                            <path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/>
+                        </svg>
+                        Windows
+                    </div>
+                    <button class="copy-btn" id="copy-win">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span>複製</span>
+                    </button>
+                </div>
+                <textarea id="win-input" placeholder="貼上 Windows 路徑...&#10;例如: \\192.168.111.253\01_歐姬兒 ozio\各部門製作物\..."></textarea>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <div class="setting-item">
+                <label for="mac-prefix">Mac 伺服器前綴 (Volumes)</label>
+                <input type="text" id="mac-prefix" value="/Volumes/">
+            </div>
+            <div class="setting-item">
+                <label for="win-prefix">Windows 伺服器前綴 (IP/主機名)</label>
+                <input type="text" id="win-prefix" value="\\192.168.111.253\">
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const macInput = document.getElementById('mac-input');
+            const winInput = document.getElementById('win-input');
+            
+            const macPrefixInput = document.getElementById('mac-prefix');
+            const winPrefixInput = document.getElementById('win-prefix');
+
+            let isUpdating = false;
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function convertMacToWin(val) {
+                if (!val) return '';
+                let macPrefix = macPrefixInput.value.trim();
+                let winPrefix = winPrefixInput.value.trim();
+                
+                // Allow user entering without trailing slash in prefix
+                if(!macPrefix.endsWith('/') && val.startsWith(macPrefix + '/')) {
+                    macPrefix = macPrefix + '/';
+                }
+                
+                let result = val;
+                const prefixRegex = new RegExp('^' + escapeRegExp(macPrefix), 'i');
+                
+                if (prefixRegex.test(result)) {
+                    result = result.replace(prefixRegex, winPrefix);
+                } else if (result.toLowerCase().startsWith('/volumes/')) {
+                    // Fallback to strict /Volumes/ if settings messed up
+                    result = result.replace(/^\/volumes\//i, winPrefix);
+                }
+                
+                // Replace all forward slashes with backward slashes
+                result = result.replace(/\//g, '\\');
+                return result;
+            }
+
+            function convertWinToMac(val) {
+                if (!val) return '';
+                let macPrefix = macPrefixInput.value.trim();
+                let winPrefix = winPrefixInput.value.trim();
+                
+                // Ensure correct trailing slashes logic for user settings
+                if(!winPrefix.endsWith('\\') && val.startsWith(winPrefix + '\\')) {
+                    winPrefix = winPrefix + '\\';
+                }
+
+                let result = val;
+                const prefixRegex = new RegExp('^' + escapeRegExp(winPrefix), 'i');
+                
+                if (prefixRegex.test(result)) {
+                    result = result.replace(prefixRegex, macPrefix);
+                } else if (result.startsWith('\\\\192.168.111.253\\')) {
+                    result = result.replace(/^\\\\192\.168\.111\.253\\/i, macPrefix);
+                }
+
+                // Replace all backward slashes with forward slashes
+                result = result.replace(/\\/g, '/');
+                return result;
+            }
+
+            // Input Event Listeners
+            macInput.addEventListener('input', (e) => {
+                if (isUpdating) return;
+                isUpdating = true;
+                winInput.value = convertMacToWin(e.target.value);
+                isUpdating = false;
+            });
+
+            winInput.addEventListener('input', (e) => {
+                if (isUpdating) return;
+                isUpdating = true;
+                macInput.value = convertWinToMac(e.target.value);
+                isUpdating = false;
+            });
+
+            // Re-evaluate on prefix change
+            macPrefixInput.addEventListener('input', () => {
+                if (macInput.value) {
+                    winInput.value = convertMacToWin(macInput.value);
+                }
+            });
+
+            winPrefixInput.addEventListener('input', () => {
+                if (winInput.value) {
+                    macInput.value = convertWinToMac(winInput.value);
+                }
+            });
+
+            // Copy Features
+            const copyMacBtn = document.getElementById('copy-mac');
+            const copyWinBtn = document.getElementById('copy-win');
+
+            function showToast(message) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast success';
+                toast.innerHTML = `
+                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>${message}</span>
+                `;
+                container.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            async function copyToClipboard(text, btnElement) {
+                if (!text) return;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    const originalHTML = btnElement.innerHTML;
+                    
+                    btnElement.classList.add('copied');
+                    btnElement.innerHTML = `
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>已複製</span>
+                    `;
+                    
+                    showToast('路徑已成功複製到剪貼簿！');
+
+                    setTimeout(() => {
+                        btnElement.classList.remove('copied');
+                        btnElement.innerHTML = originalHTML;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    alert('複製失敗，請手動複製。');
+                }
+            }
+
+            copyMacBtn.addEventListener('click', () => copyToClipboard(macInput.value, copyMacBtn));
+            copyWinBtn.addEventListener('click', () => copyToClipboard(winInput.value, copyWinBtn));
+        });
+    </script>
+</body>
+</html>
