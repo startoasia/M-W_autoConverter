@@ -327,8 +327,8 @@
   <body>
     <div class="container">
       <header>
-        <h1>跨系統路徑轉換工具</h1>
-        <p class="subtitle">即時雙向轉換 Apple (Mac) 與 Windows 伺服器路徑</p>
+        <h1 id="main-title">跨系統路徑轉換工具</h1>
+        <p class="subtitle" id="sub-title">即時雙向轉換 Apple (Mac) 與 Windows 伺服器路徑</p>
       </header>
 
       <div class="converter-grid">
@@ -342,7 +342,7 @@
                   d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
                 />
               </svg>
-              Apple (Mac)
+              <span id="mac-os-label">Apple (Mac)</span>
             </div>
             <button class="copy-btn" id="copy-mac">
               <svg
@@ -358,7 +358,7 @@
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
-              <span>複製</span>
+              <span class="copy-text">複製</span>
             </button>
           </div>
           <textarea
@@ -387,7 +387,7 @@
                   d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"
                 />
               </svg>
-              Windows
+              <span id="win-os-label">Windows</span>
             </div>
             <button class="copy-btn" id="copy-win">
               <svg
@@ -403,7 +403,7 @@
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
-              <span>複製</span>
+              <span class="copy-text">複製</span>
             </button>
           </div>
           <textarea
@@ -415,11 +415,11 @@
 
       <div class="settings-panel">
         <div class="setting-item">
-          <label for="mac-prefix">Mac 伺服器前綴 (Volumes)</label>
+          <label for="mac-prefix" id="mac-prefix-label">Mac 伺服器前綴 (Volumes)</label>
           <input type="text" id="mac-prefix" value="/Volumes/" />
         </div>
         <div class="setting-item">
-          <label for="win-prefix">Windows 伺服器前綴 (IP/主機名)</label>
+          <label for="win-prefix" id="win-prefix-label">Windows 伺服器前綴 (IP/主機名)</label>
           <input type="text" id="win-prefix" value="\\NAS\" />
         </div>
       </div>
@@ -429,6 +429,70 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
+        // 多語言字串字典
+        const i18n = {
+          "zh-TW": {
+            pageTitle: "跨系統路徑轉換工具 | Mac ⇄ Windows",
+            mainTitle: "跨系統路徑轉換工具",
+            subTitle: "即時雙向轉換 Apple (Mac) 與 Windows 伺服器路徑",
+            macOsLabel: "Apple (Mac)",
+            winOsLabel: "Windows",
+            copyBtn: "複製",
+            copiedBtn: "已複製",
+            macPlaceholder: "貼上 Mac 路徑...\n例如: /Volumes/ShareDrive/Design_Project/...",
+            winPlaceholder: "貼上 Windows 路徑...\n例如: \\\\192.168.1.100\\ShareDrive\\Design_Project\\...",
+            macPrefixLabel: "Mac 伺服器前綴 (Volumes)",
+            winPrefixLabel: "Windows 伺服器前綴 (IP/主機名)",
+            copySuccess: "路徑已成功複製到剪貼簿！",
+            copyFailed: "複製失敗，請手動複製。",
+          },
+          en: {
+            pageTitle: "Cross-System Path Converter | Mac ⇄ Windows",
+            mainTitle: "Cross-System Path Converter",
+            subTitle: "Real-time bidirectional conversion for Apple (Mac) and Windows server paths",
+            macOsLabel: "Apple (Mac)",
+            winOsLabel: "Windows",
+            copyBtn: "Copy",
+            copiedBtn: "Copied",
+            macPlaceholder: "Paste Mac path...\ne.g.: /Volumes/ShareDrive/Design_Project/...",
+            winPlaceholder: "Paste Windows path...\ne.g.: \\\\192.168.1.100\\ShareDrive\\Design_Project\\...",
+            macPrefixLabel: "Mac Server Prefix (Volumes)",
+            winPrefixLabel: "Windows Server Prefix (IP/Hostname)",
+            copySuccess: "Path copied to clipboard successfully!",
+            copyFailed: "Failed to copy, please copy manually.",
+          },
+          ja: {
+            pageTitle: "クロスプラットフォーム パス変換ツール | Mac ⇄ Windows",
+            mainTitle: "クロスプラットフォーム パス変換ツール",
+            subTitle: "Apple (Mac) と Windows のサーバーパスをリアルタイムで双方向変換",
+            macOsLabel: "Apple (Mac)",
+            winOsLabel: "Windows",
+            copyBtn: "コピー",
+            copiedBtn: "コピー済み",
+            macPlaceholder: "Mac のパスを貼り付け...\n例: /Volumes/ShareDrive/Design_Project/...",
+            winPlaceholder: "Windows のパスを貼り付け...\n例: \\\\192.168.1.100\\ShareDrive\\Design_Project\\...",
+            macPrefixLabel: "Mac サーバーのプレフィックス (Volumes)",
+            winPrefixLabel: "Windows サーバーのプレフィックス (IP/ホスト名)",
+            copySuccess: "パスをクリップボードにコピーしました！",
+            copyFailed: "コピーに失敗しました。手動でコピーしてください。",
+          },
+        };
+        const userLang = navigator.language || navigator.userLanguage;
+        const currentLang = userLang; // 可根據需求切換成 "en"
+        const t = i18n[currentLang];
+
+        // 初始化多語言介面
+        document.title = t.pageTitle;
+        document.getElementById("main-title").textContent = t.mainTitle;
+        document.getElementById("sub-title").textContent = t.subTitle;
+        document.getElementById("mac-os-label").textContent = t.macOsLabel;
+        document.getElementById("win-os-label").textContent = t.winOsLabel;
+        document.querySelectorAll(".copy-text").forEach((el) => (el.textContent = t.copyBtn));
+        document.getElementById("mac-input").placeholder = t.macPlaceholder;
+        document.getElementById("win-input").placeholder = t.winPlaceholder;
+        document.getElementById("mac-prefix-label").textContent = t.macPrefixLabel;
+        document.getElementById("win-prefix-label").textContent = t.winPrefixLabel;
+
         const macInput = document.getElementById("mac-input");
         const winInput = document.getElementById("win-input");
 
@@ -554,10 +618,10 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        <span>已複製</span>
+                        <span class="copy-text">${t.copiedBtn}</span>
                     `;
 
-            showToast("路徑已成功複製到剪貼簿！");
+            showToast(t.copySuccess);
 
             setTimeout(() => {
               btnElement.classList.remove("copied");
@@ -565,7 +629,7 @@
             }, 2000);
           } catch (err) {
             console.error("Failed to copy text: ", err);
-            alert("複製失敗，請手動複製。");
+            alert(t.copyFailed);
           }
         }
 
